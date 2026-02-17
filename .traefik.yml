@@ -1,0 +1,16 @@
+displayName: DataDome
+type: middleware
+import: github.com/DataDome/module-traefik-package
+iconPath: .assets/icon.png
+
+summary: |
+  Bot protection middleware with DataDome.
+  Detects and blocks automated threats, bots, and malicious traffic in real-time.
+
+testData:
+  serverSideKey: "your_server_side_key"
+  endpoint: "api.datadome.co"
+  timeout: 300
+  enableGraphQLSupport: false
+  enableReferrerRestoration: false
+  useXForwardedHost: false
