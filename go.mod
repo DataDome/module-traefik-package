@@ -1,4 +1,4 @@
-module github.com/DataDome/module-traefik
+module github.com/DataDome/module-traefik-package
 
 go 1.20
 
