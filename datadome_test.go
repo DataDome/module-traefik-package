@@ -1,4 +1,4 @@
-package module_traefik_test
+package module_traefik_package_test
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	moduletraefik "github.com/DataDome/module-traefik"
+	moduletraefik "github.com/DataDome/module-traefik-package"
 )
 
 func TestCreateConfig(t *testing.T) {

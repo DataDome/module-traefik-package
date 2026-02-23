@@ -1,4 +1,4 @@
-package module_traefik
+package module_traefik_package
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 
 const (
 	ModuleName    = "Traefik"
-	ModuleVersion = "1.0.0"
+	ModuleVersion = "1.0.1"
 )
 
 type Config struct {
