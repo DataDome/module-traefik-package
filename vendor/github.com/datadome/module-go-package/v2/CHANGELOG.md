@@ -1,5 +1,9 @@
 # DataDome Go Module
 
+## v2.3.0 (2026-04-28)
+
+- Collect [Sec-Fetch-Storage-Access header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-Fetch-Storage-Access) from requests
+
 ## v2.2.1 (2025-12-02)
 
 - Remove `go-querystring` dependency and reimplement URL encoding for payloads

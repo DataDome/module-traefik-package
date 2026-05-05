@@ -16,7 +16,7 @@ const (
 	DefaultEndpointValue                  = "api.datadome.co"
 	DefaultMaximumBodySizeValue           = 25 * 1024
 	DefaultModuleNameValue                = "Golang"
-	DefaultModuleVersionValue             = "2.2.1"
+	DefaultModuleVersionValue             = "2.3.0"
 	DefaultTimeoutValue                   = 150
 	DefaultUrlPatternInclusionValue       = ""
 	DefaultUrlPatternExclusionValue       = `(?i)\.(avi|avif|bmp|css|eot|flac|flv|gif|gz|ico|jpeg|jpg|js|json|less|map|mka|mkv|mov|mp3|mp4|mpeg|mpg|ogg|ogm|opus|otf|png|svg|svgz|swf|ttf|wav|webm|webp|woff|woff2|xml|zip)$`
@@ -258,6 +258,7 @@ func (c *Client) buildRequest(r *http.Request) (string, error) {
 		SecFetchDest:           truncateValue(SecFetchDest, r.Header.Get("sec-fetch-dest")),
 		SecFetchMode:           truncateValue(SecFetchMode, r.Header.Get("sec-fetch-mode")),
 		SecFetchSite:           truncateValue(SecFetchSite, r.Header.Get("sec-fetch-site")),
+		SecFetchStorageAccess:  truncateValue(SecFetchStorageAccess, r.Header.Get("sec-fetch-storage-access")),
 		SecFetchUser:           truncateValue(SecFetchUser, r.Header.Get("sec-fetch-user")),
 		ServerHostName:         truncateValue(ServerHostname, host),
 		ServerName:             truncateValue(ServerName, host),

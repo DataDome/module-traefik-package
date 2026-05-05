@@ -126,6 +126,7 @@ const (
 	SecCHUAModel           ApiFields = "SecCHUAModel"
 	SecCHUAPlatform        ApiFields = "SecCHUAPlatform"
 	SecFetchUser           ApiFields = "SecFetchUser"
+	SecFetchStorageAccess  ApiFields = "SecFetchStorageAccess"
 	SecFetchDest           ApiFields = "SecFetchDest"
 	SecFetchMode           ApiFields = "SecFetchMode"
 	SecFetchSite           ApiFields = "SecFetchSite"
@@ -142,7 +143,7 @@ const (
 // getTruncationSize returns the maximal size allowed for a given [ApiFields]
 func getTruncationSize(key ApiFields) int {
 	switch key {
-	case SecCHDeviceMemory, SecCHUAMobile, SecFetchUser:
+	case SecCHDeviceMemory, SecCHUAMobile, SecFetchUser, SecFetchStorageAccess:
 		return 8
 	case SecCHUAArch:
 		return 16

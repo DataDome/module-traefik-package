@@ -1,3 +1,3 @@
-# github.com/datadome/module-go-package/v2 v2.2.1
+# github.com/datadome/module-go-package/v2 v2.3.0
 ## explicit; go 1.20
 github.com/datadome/module-go-package/v2

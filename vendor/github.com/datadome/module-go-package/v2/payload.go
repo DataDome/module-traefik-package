@@ -65,6 +65,7 @@ type ProtectionAPIRequestPayload struct {
 	SecFetchDest           string
 	SecFetchMode           string
 	SecFetchSite           string
+	SecFetchStorageAccess  string
 	SecFetchUser           string
 	Via                    string
 	From                   string
@@ -130,6 +131,7 @@ func (p *ProtectionAPIRequestPayload) Encode() string {
 	addParam("SecFetchDest", p.SecFetchDest)
 	addParam("SecFetchMode", p.SecFetchMode)
 	addParam("SecFetchSite", p.SecFetchSite)
+	addParam("SecFetchStorageAccess", p.SecFetchStorageAccess)
 	addParam("SecFetchUser", p.SecFetchUser)
 	addParam("Via", p.Via)
 	addParam("From", p.From)
