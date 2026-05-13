@@ -16,7 +16,7 @@ const (
 	DefaultEndpointValue                  = "api.datadome.co"
 	DefaultMaximumBodySizeValue           = 25 * 1024
 	DefaultModuleNameValue                = "Golang"
-	DefaultModuleVersionValue             = "2.3.0"
+	DefaultModuleVersionValue             = "2.3.1"
 	DefaultTimeoutValue                   = 150
 	DefaultUrlPatternInclusionValue       = ""
 	DefaultUrlPatternExclusionValue       = `(?i)\.(avi|avif|bmp|css|eot|flac|flv|gif|gz|ico|jpeg|jpg|js|json|less|map|mka|mkv|mov|mp3|mp4|mpeg|mpg|ogg|ogm|opus|otf|png|svg|svgz|swf|ttf|wav|webm|webp|woff|woff2|xml|zip)$`
@@ -127,13 +127,11 @@ func (c *Client) handler(w http.ResponseWriter, r *http.Request, next http.Handl
 	uri := getURI(r)
 	// Test exclusion regex
 	if c.urlPatternExclusion != nil && c.urlPatternExclusion.MatchString(uri) {
-		c.Logger.Info("UrlPatternExclusion matches requested URI, skipping.")
 		return false, nil
 	}
 
 	// Test inclusion regex
 	if c.urlPatternInclusion != nil && !c.urlPatternInclusion.MatchString(uri) {
-		c.Logger.Info("UrlPatternInclusion does not match requested URI, skipping.")
 		return false, nil
 	}
 
