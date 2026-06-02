@@ -151,11 +151,11 @@ func getTruncationSize(key ApiFields) int {
 		return 32
 	case ContentType, SecFetchSite:
 		return 64
-	case CacheControl, ClientID, XRequestedWith, AcceptCharset, AcceptEncoding, Pragma, Connection, From, SecCHUA, SecCHUAModel, TrueClientIP, XRealIP, GraphQLOperationName:
+	case CacheControl, XRequestedWith, AcceptCharset, AcceptEncoding, Pragma, Connection, From, SecCHUA, SecCHUAModel, TrueClientIP, XRealIP, GraphQLOperationName:
 		return 128
 	case AcceptLanguage, SecCHUAFullVersionList, Via:
 		return 256
-	case HeadersList, Origin, ServerHostname, ServerName, Accept, Host:
+	case ClientID, HeadersList, Origin, ServerHostname, ServerName, Accept, Host:
 		return 512
 	case XForwardedForIP:
 		return -512

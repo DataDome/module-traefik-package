@@ -35,7 +35,7 @@ func TestNew(t *testing.T) {
 			name:        "missing server side key",
 			config:      &moduletraefik.Config{},
 			wantErr:     true,
-			errContains: "failed to create DataDome client: ServerSideKey must be defined",
+			errContains: "failed to create DataDome client: property ServerSideKey must be defined",
 		},
 		{
 			name: "config with optional fields",

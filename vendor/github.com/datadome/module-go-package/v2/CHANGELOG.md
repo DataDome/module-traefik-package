@@ -1,5 +1,11 @@
 # DataDome Go Module
 
+## v2.4.0 (2026-06-01)
+
+- Remove hard-coded status codes in favor of DataDome Protection API response headers, enabling seamless support for upcoming features
+- Increase length limit from 128 to 512 characters for DataDome cookie to support upcoming features
+- Reduce log verbosity in `httpClient`
+
 ## v2.3.1 (2026-05-13)
 
 - Reduce log verbosity in `client.handler`

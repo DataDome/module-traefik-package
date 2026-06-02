@@ -10,7 +10,7 @@ import (
 
 const (
 	ModuleName    = "Traefik"
-	ModuleVersion = "1.1.1"
+	ModuleVersion = "1.2.0"
 )
 
 type Config struct {

@@ -1,5 +1,11 @@
 # DataDome Traefik plugin
 
+## v1.2.0 (2026-06-02)
+
+- Remove hard-coded status codes in favor of DataDome Protection API response headers, enabling seamless support for upcoming features
+- Increase length limit from 128 to 512 characters for DataDome cookie to support upcoming features
+- Reduce log verbosity in `httpClient`
+
 ## v1.1.1 (2026-05-13)
 
 - Reduce log verbosity in `client.handler`

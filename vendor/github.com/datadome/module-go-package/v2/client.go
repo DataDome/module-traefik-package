@@ -1,6 +1,8 @@
 package modulego
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -16,7 +18,7 @@ const (
 	DefaultEndpointValue                  = "api.datadome.co"
 	DefaultMaximumBodySizeValue           = 25 * 1024
 	DefaultModuleNameValue                = "Golang"
-	DefaultModuleVersionValue             = "2.3.1"
+	DefaultModuleVersionValue             = "2.4.0"
 	DefaultTimeoutValue                   = 150
 	DefaultUrlPatternInclusionValue       = ""
 	DefaultUrlPatternExclusionValue       = `(?i)\.(avi|avif|bmp|css|eot|flac|flv|gif|gz|ico|jpeg|jpg|js|json|less|map|mka|mkv|mov|mp3|mp4|mpeg|mpg|ogg|ogm|opus|otf|png|svg|svgz|swf|ttf|wav|webm|webp|woff|woff2|xml|zip)$`
@@ -70,13 +72,13 @@ func NewClient(serverSideKey string, options ...Option) (*Client, error) {
 
 	// error management
 	if c.ServerSideKey == "" {
-		return nil, fmt.Errorf("ServerSideKey must be defined")
+		return nil, fmt.Errorf("property ServerSideKey must be defined")
 	}
 	if c.Timeout <= 0 {
-		return nil, fmt.Errorf("Timeout must be a positive integer")
+		return nil, fmt.Errorf("property Timeout must be a positive integer")
 	}
 	if c.MaximumBodySize <= 0 {
-		return nil, fmt.Errorf("MaximumBodySize must be a positive integer")
+		return nil, fmt.Errorf("property MaximumBodySize must be a positive integer")
 	}
 
 	// set not exported values
@@ -89,14 +91,14 @@ func NewClient(serverSideKey string, options ...Option) (*Client, error) {
 	if c.UrlPatternExclusion != "" {
 		r, err := regexp.Compile(c.UrlPatternExclusion)
 		if err != nil {
-			return nil, fmt.Errorf("UrlPatternExclusion must be a valid RegExp: %w", err)
+			return nil, fmt.Errorf("property UrlPatternExclusion must be a valid RegExp: %w", err)
 		}
 		c.urlPatternExclusion = r
 	}
 	if c.UrlPatternInclusion != "" {
 		r, err := regexp.Compile(c.UrlPatternInclusion)
 		if err != nil {
-			return nil, fmt.Errorf("UrlPatternInclusion must be a valid RegExp: %w", err)
+			return nil, fmt.Errorf("property UrlPatternInclusion must be a valid RegExp: %w", err)
 		}
 		c.urlPatternInclusion = r
 	}
@@ -137,13 +139,19 @@ func (c *Client) handler(w http.ResponseWriter, r *http.Request, next http.Handl
 
 	queryStr, err := c.buildRequest(r)
 	if err != nil {
-		c.Logger.Error("error when building request payload: %v", err)
+		c.Logger.Error("error when building request payload: ", err)
 		return sendNext(false, err, w)
 	}
 
-	err, resp, isBlocked := c.datadomeCall(queryStr, r, w)
+	resp, isBlocked, err := c.datadomeCall(queryStr, r, w)
 	if err != nil {
-		c.Logger.Error("error when performing call to Protection API: %v", err)
+		switch {
+		case errors.Is(err, context.Canceled):
+		case errors.Is(err, context.DeadlineExceeded):
+			c.Logger.Debug("Protection API call timed out: ", err)
+		default:
+			c.Logger.Error("error when performing call to Protection API: ", err)
+		}
 		return sendNext(isBlocked, err, resp)
 	}
 	return sendNext(isBlocked, nil, resp)
@@ -209,11 +217,11 @@ func (c *Client) buildRequest(r *http.Request) (string, error) {
 	if c.EnableReferrerRestoration {
 		isMatching, err := isMatchingReferrer(r)
 		if err != nil {
-			c.Logger.Warn("fail to check if the referrer matches: %v", err)
+			c.Logger.Warn("fail to check if the referrer matches: ", err)
 		} else if isMatching {
 			err = restoreReferrer(r)
 			if err != nil {
-				c.Logger.Warn("fail to restore the referrer: %v", err)
+				c.Logger.Warn("fail to restore the referrer: ", err)
 			}
 		}
 	}
@@ -272,7 +280,7 @@ func (c *Client) buildRequest(r *http.Request) (string, error) {
 	if c.EnableGraphQLSupport && isGraphQLRequest(r) {
 		gqlData, err := getGraphQLData(r, c.MaximumBodySize)
 		if err != nil {
-			c.Logger.Warn("fail to retrieve GraphQL data: %v", err)
+			c.Logger.Warn("fail to retrieve GraphQL data: ", err)
 		}
 		if gqlData != nil && gqlData.Count != 0 {
 			ddRequestParams.GraphQLOperationName = truncateValue(GraphQLOperationName, gqlData.Name)
@@ -285,11 +293,11 @@ func (c *Client) buildRequest(r *http.Request) (string, error) {
 }
 
 // datadomeCall performs a request to the Protection API
-func (c *Client) datadomeCall(jsonStr string, origReq *http.Request, origResp http.ResponseWriter) (err error, rw http.ResponseWriter, isBlocked bool) {
+func (c *Client) datadomeCall(jsonStr string, origReq *http.Request, origResp http.ResponseWriter) (rw http.ResponseWriter, isBlocked bool, err error) {
 	body := strings.NewReader(jsonStr)
 	req, err := http.NewRequestWithContext(origReq.Context(), "POST", c.endpoint, body)
 	if err != nil {
-		return fmt.Errorf("error when instancing new DataDome request %w", err), nil, false
+		return nil, false, fmt.Errorf("error when instancing new DataDome request %w", err)
 	}
 	req.Header.Set("content-type", "application/x-www-form-urlencoded")
 	req.Header.Set("user-agent", "DataDome")
@@ -300,49 +308,46 @@ func (c *Client) datadomeCall(jsonStr string, origReq *http.Request, origResp ht
 
 	response, err := c.httpClient.Do(req)
 	if err != nil {
-		return fmt.Errorf("error when performing DataDome request: %w", err), nil, false
+		return nil, false, fmt.Errorf("error when performing DataDome request: %w", err)
 	}
 
 	responseBody, err := io.ReadAll(response.Body)
 	if err != nil {
-		return fmt.Errorf("error when reading DataDome response %w", err), nil, false
+		return nil, false, fmt.Errorf("error when reading DataDome response %w", err)
 	}
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			c.Logger.Warn("error when closing the Body: %v", err)
+			c.Logger.Warn("error when closing the Body: ", err)
 		}
 	}(response.Body)
 
 	ddStatus := response.Header.Get("x-datadomeresponse")
-	ddRespStatus := strconv.Itoa(response.StatusCode)
 
-	if ddStatus == "" || (ddRespStatus != ddStatus) {
-		c.Logger.Debug("fail to get status code and response headers from Protection API response. reason: %s", string(responseBody))
-		return fmt.Errorf("fails to get status code and response headers from Protection API response. Bypass DataDome. Full DataDome response: %v", response), nil, false
+	// Missing header: fail-open
+	if ddStatus == "" {
+		return origResp, false, nil
 	}
 
-	// Handler DataDome status code
-	switch ddStatus {
-	case "400":
-		return nil, origResp, false
-	case "301", "302", "401", "403":
-		origResp = addDataDomeHeaders(response, origResp)
-		origResp.WriteHeader(response.StatusCode)
-		_, err = origResp.Write(responseBody)
-		if err != nil {
-			return err, nil, false
-		}
-		return nil, origResp, true
+	addDataDomeRequestHeaders(response, origReq)
+	origResp = addDataDomeHeaders(response, origResp)
 
-	case "200":
-		addDataDomeRequestHeaders(response, origReq)
-		origResp = addDataDomeHeaders(response, origResp)
-		return nil, origResp, false
-
-	default:
-		return fmt.Errorf("%s response from Protection API - Unexpected error. If the error remains, please contact us at support@datadome.co. Full response: %v", ddStatus, response.Header), origResp, false
+	// Allow
+	if ddStatus == "200" {
+		return origResp, false, nil
 	}
+
+	ddStatusCode, parseErr := strconv.Atoi(ddStatus)
+	if parseErr != nil {
+		return origResp, false, fmt.Errorf("%s response from Protection API - Unexpected error. If the error remains, please contact us at support@datadome.co. Full response: %v", ddStatus, response.Header)
+	}
+
+	origResp.WriteHeader(ddStatusCode)
+	_, err = origResp.Write(responseBody)
+	if err != nil {
+		return nil, false, err
+	}
+	return origResp, true, nil
 }
 
 // addDataDomeRequestHeaders add the headers listed in the `X-datadome-request-headers`
