@@ -1,5 +1,9 @@
 # DataDome Traefik plugin
 
+## v1.3.0 (2026-08-18)
+
+- Introduce `GraphQLEndpoint` parameter to specify paths for the GraphQL endpoint (defaults to `/graphql`)
+
 ## v1.2.0 (2026-06-02)
 
 - Remove hard-coded status codes in favor of DataDome Protection API response headers, enabling seamless support for upcoming features

@@ -96,6 +96,7 @@ http:
 | `enableGraphQLSupport` | boolean | No | `false` | Enables the support of GraphQL requests. |
 | `enableReferrerRestoration` | boolean | No | `false` | Restores original referrer after a challenge is passed. |
 | `endpoint` | string | No | `api.datadome.co` | Host of the Protection API. |
+| `graphQLEndpoint` | string | No | `/graphql` | Comma-separated path(s) used to detect GraphQL requests. Only used when `enableGraphQLSupport` is `true`. |
 | `maximumBodySize` | integer | No | 25 Kb | Maximum request body size (in bytes) to analyze. |
 | `timeout` | integer | No | `150` | Timeout in milliseconds, after which the request will be allowed. |
 | `urlPatternExclusion` | string | No | `(?i)\.(avi\|flv\|mka\|mkv\|mov\|mp4\|mpeg\|mpg\|mp3\|flac\|ogg\|ogm\|opus\|wav\|webm\|webp\|bmp\|gif\|ico\|jpeg\|jpg\|png\|svg\|svgz\|swf\|eot\|otf\|ttf\|woff\|woff2\|css\|less\|js\|map\|json)$` | Regex to match to exclude requests from being processed with the Protection API. If not defined, all requests will be processed. |
@@ -113,6 +114,7 @@ http:
           serverSideKey: "YOUR_DATADOME_SERVER_SIDE_KEY"
           timeout: 300
           enableGraphQLSupport: true
+          graphQLEndpoint: "/graphql"
           useXForwardedHost: true
 ```
 

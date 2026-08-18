@@ -16,9 +16,10 @@ const (
 	DefaultEnableGraphQLSupportValue      = false
 	DefaultEnableReferrerRestorationValue = false
 	DefaultEndpointValue                  = "api.datadome.co"
+	DefaultGraphQLEndpointValue           = "graphql"
 	DefaultMaximumBodySizeValue           = 25 * 1024
 	DefaultModuleNameValue                = "Golang"
-	DefaultModuleVersionValue             = "2.4.0"
+	DefaultModuleVersionValue             = "2.5.0"
 	DefaultTimeoutValue                   = 150
 	DefaultUrlPatternInclusionValue       = ""
 	DefaultUrlPatternExclusionValue       = `(?i)\.(avi|avif|bmp|css|eot|flac|flv|gif|gz|ico|jpeg|jpg|js|json|less|map|mka|mkv|mov|mp3|mp4|mpeg|mpg|ogg|ogm|opus|otf|png|svg|svgz|swf|ttf|wav|webm|webp|woff|woff2|xml|zip)$`
@@ -31,6 +32,7 @@ type Client struct {
 	EnableGraphQLSupport      bool
 	EnableReferrerRestoration bool
 	Endpoint                  string
+	GraphQLEndpoint           string
 	Logger                    Logger
 	MaximumBodySize           int
 	ModuleName                string
@@ -42,6 +44,7 @@ type Client struct {
 	UseXForwardedHost         bool
 
 	endpoint            string
+	graphQLEndpoints    []string
 	httpClient          *http.Client
 	urlPatternExclusion *regexp.Regexp
 	urlPatternInclusion *regexp.Regexp
@@ -55,6 +58,7 @@ func NewClient(serverSideKey string, options ...Option) (*Client, error) {
 		EnableGraphQLSupport:      DefaultEnableGraphQLSupportValue,
 		EnableReferrerRestoration: DefaultEnableReferrerRestorationValue,
 		Endpoint:                  DefaultEndpointValue,
+		GraphQLEndpoint:           DefaultGraphQLEndpointValue,
 		Logger:                    NewDefaultLogger(),
 		MaximumBodySize:           DefaultMaximumBodySizeValue,
 		ModuleName:                DefaultModuleNameValue,
@@ -105,6 +109,13 @@ func NewClient(serverSideKey string, options ...Option) (*Client, error) {
 	c.endpoint = c.Endpoint
 	if !strings.HasPrefix(c.Endpoint, "http") && !strings.HasPrefix(c.Endpoint, "/") {
 		c.endpoint = fmt.Sprintf("https://%s/validate-request", c.Endpoint)
+	}
+	if c.GraphQLEndpoint != "" {
+		for _, endpoint := range strings.Split(c.GraphQLEndpoint, ",") {
+			if endpoint = strings.ToLower(strings.TrimSpace(endpoint)); endpoint != "" {
+				c.graphQLEndpoints = append(c.graphQLEndpoints, endpoint)
+			}
+		}
 	}
 
 	return c, nil
@@ -277,7 +288,7 @@ func (c *Client) buildRequest(r *http.Request) (string, error) {
 		XRequestedWith:         truncateValue(XRequestedWith, r.Header.Get("x-requested-with")),
 	}
 
-	if c.EnableGraphQLSupport && isGraphQLRequest(r) {
+	if c.EnableGraphQLSupport && isGraphQLRequest(r, c.graphQLEndpoints) {
 		gqlData, err := getGraphQLData(r, c.MaximumBodySize)
 		if err != nil {
 			c.Logger.Warn("fail to retrieve GraphQL data: ", err)

@@ -16,6 +16,14 @@ func WithGraphQLSupport(enableGraphQLSupport bool) Option {
 	}
 }
 
+// WithGraphQLEndpoint is a functional option to set the GraphQL endpoint path(s) (comma-separated)
+// used to detect GraphQL requests on the protected application.
+func WithGraphQLEndpoint(graphQLEndpoint string) Option {
+	return func(c *Client) {
+		c.GraphQLEndpoint = graphQLEndpoint
+	}
+}
+
 // WithLogger is a functional option to set a custom Logger for the Client.
 func WithLogger(logger Logger) Option {
 	return func(c *Client) {

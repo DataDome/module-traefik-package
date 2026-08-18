@@ -44,6 +44,7 @@ func TestNew(t *testing.T) {
 				EnableGraphQLSupport:      boolPtr(true),
 				EnableReferrerRestoration: boolPtr(true),
 				Endpoint:                  stringPtr("https://api.datadome.co"),
+				GraphQLEndpoint:           stringPtr("/gql"),
 				MaximumBodySize:           intPtr(1024),
 				Timeout:                   intPtr(5000),
 				UrlPatternExclusion:       stringPtr("/health"),
@@ -177,6 +178,13 @@ func TestConfigOptions(t *testing.T) {
 			config: &moduletraefik.Config{
 				ServerSideKey:        "test-key",
 				EnableGraphQLSupport: boolPtr(true),
+			},
+		},
+		{
+			name: "Custom GraphQL Endpoint",
+			config: &moduletraefik.Config{
+				ServerSideKey:   "test-key",
+				GraphQLEndpoint: stringPtr("/gql"),
 			},
 		},
 		{

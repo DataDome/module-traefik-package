@@ -14,3 +14,4 @@ testData:
   enableGraphQLSupport: false
   enableReferrerRestoration: false
   useXForwardedHost: false
+  graphQLEndpoint: "/graphql"

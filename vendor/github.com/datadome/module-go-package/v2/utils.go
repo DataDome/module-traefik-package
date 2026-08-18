@@ -68,10 +68,14 @@ func getHeaderList(r *http.Request) string {
 
 // getURL returns the path and the query parameters (if present) of the request
 func getURL(r *http.Request) string {
+	path := r.URL.Path
+	if path == "" {
+		path = "/"
+	}
 	if r.URL.RawQuery != "" {
-		return r.URL.Path + "?" + r.URL.RawQuery
+		return path + "?" + r.URL.RawQuery
 	} else {
-		return r.URL.Path
+		return path
 	}
 }
 
@@ -189,8 +193,20 @@ func truncateValue(key ApiFields, value string) string {
 }
 
 // isGraphQLRequest indicates if the incoming request is a GraphQL request.
-func isGraphQLRequest(r *http.Request) bool {
-	return r.Header.Get("Content-Type") == "application/json" && r.Method == "POST" && r.ContentLength > 0 && strings.Contains(r.URL.Path, "graphql")
+func isGraphQLRequest(r *http.Request, graphQLEndpoints []string) bool {
+	if r.Method != http.MethodPost || r.ContentLength == 0 {
+		return false
+	}
+	if !strings.HasPrefix(strings.ToLower(r.Header.Get("Content-Type")), "application/json") {
+		return false
+	}
+	path := strings.ToLower(r.URL.Path)
+	for _, endpoint := range graphQLEndpoints {
+		if strings.Contains(path, endpoint) {
+			return true
+		}
+	}
+	return false
 }
 
 // readBodyWithoutConsuming extracts the GraphQL query from the body.

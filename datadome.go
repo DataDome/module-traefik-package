@@ -10,7 +10,7 @@ import (
 
 const (
 	ModuleName    = "Traefik"
-	ModuleVersion = "1.2.0"
+	ModuleVersion = "1.3.0"
 )
 
 type Config struct {
@@ -18,6 +18,7 @@ type Config struct {
 	EnableGraphQLSupport      *bool   `json:"enableGraphQLSupport,omitempty"`
 	EnableReferrerRestoration *bool   `json:"enableReferrerRestoration,omitempty"`
 	Endpoint                  *string `json:"endpoint,omitempty"`
+	GraphQLEndpoint           *string `json:"graphQLEndpoint,omitempty"`
 	MaximumBodySize           *int    `json:"maximumBodySize,omitempty"`
 	Timeout                   *int    `json:"timeout,omitempty"`
 	UrlPatternExclusion       *string `json:"urlPatternExclusion,omitempty"`
@@ -46,6 +47,9 @@ func loadOptionsFromConfig(config *Config) []modulego.Option {
 	}
 	if config.Endpoint != nil {
 		options = append(options, modulego.WithEndpoint(*config.Endpoint))
+	}
+	if config.GraphQLEndpoint != nil {
+		options = append(options, modulego.WithGraphQLEndpoint(*config.GraphQLEndpoint))
 	}
 	if config.MaximumBodySize != nil {
 		options = append(options, modulego.WithMaximumBodySize(*config.MaximumBodySize))
